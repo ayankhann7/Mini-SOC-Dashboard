@@ -13,7 +13,8 @@ MINI_SOC/
 ├── README.md           # Documentation
 ├── database.db         # SQLite database file (auto-generated)
 ├── dataset/
-│   └── security_logs.csv # Sample dataset for testing
+│   ├── security_logs.csv     # Sample CSV dataset for testing
+│   └── sample_capture.pcap   # Sample Wireshark PCAP for deep packet inspection
 ├── templates/          # HTML templates
 │   ├── base.html
 │   ├── login.html
@@ -68,7 +69,7 @@ To use the "Start Live Capture" feature on Windows, you must install **[Npcap](h
    - **Password:** admin123
 3. **Testing the Detection Engine:**
    - Go to the **Logs** tab.
-   - Click **Choose File** and select `dataset/security_logs.csv`.
+   - Click **Choose File** and select **EITHER** `dataset/security_logs.csv` or `dataset/sample_capture.pcap`.
    - Click **Upload & Analyze**.
    - Navigate to the **Alerts** or **Dashboard** tab to view the generated threats.
 4. **Investigating Alerts:**
