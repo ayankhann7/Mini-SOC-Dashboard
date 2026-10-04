@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="login-container card">
+    <h2 style="color: #00bcd4; margin-top: 0;">SOC Analyst Login</h2>
+    <form method="POST" action="{{ url_for('login') }}">
+        <label>Username</label>
+        <input type="text" name="username" placeholder="Enter username" required>
+        <label>Password</label>
+        <input type="password" name="password" placeholder="Enter password" required>
+        <button type="submit" class="btn" style="width: 100%;">Login</button>
+    </form>
+    <p style="margin-top: 20px; font-size: 0.9em; color: #888; text-align: center;">Demo Account: admin / admin123</p>
+</div>
+{% endblock %}

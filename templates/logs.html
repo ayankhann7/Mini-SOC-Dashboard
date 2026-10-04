@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Security Logs</h2>
+
+<div class="card">
+    <h3 style="margin-top: 0;">Upload New Log (CSV or PCAP)</h3>
+    <p style="color: #aaa; font-size: 0.9em;">Uploading a CSV or a Wireshark .pcap file will automatically unpack the packets and run the detection engine to generate alerts.</p>
+    <form method="POST" enctype="multipart/form-data" style="display: flex; gap: 10px; align-items: center;">
+        <input type="file" name="file" accept=".csv, .pcap" required style="width: auto;">
+        <button type="submit" class="btn">Upload & Analyze</button>
+    </form>
+</div>
+
+<div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+        <h3 style="margin: 0;">Recent Logs (Latest 100)</h3>
+        <form method="GET" style="display: flex; gap: 10px;">
+            <input type="text" name="search_ip" placeholder="Search Source IP..." value="{{ search_ip }}" style="width: auto; padding: 5px;">
+            <input type="text" name="search_event" placeholder="Search Event Type..." value="{{ search_event }}" style="width: auto; padding: 5px;">
+            <button type="submit" class="btn btn-sm">Filter</button>
+            <a href="{{ url_for('logs') }}" class="btn btn-sm" style="background-color: #555; color: white;">Clear</a>
+        </form>
+    </div>
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>Timestamp</th>
+            <th>Source IP</th>
+            <th>Event Type</th>
+            <th>Status</th>
+            <th>Port</th>
+        </tr>
+        {% for log in logs %}
+        <tr>
+            <td>{{ log.id }}</td>
+            <td>{{ log.timestamp }}</td>
+            <td>{{ log.source_ip }}</td>
+            <td>{{ log.event_type }}</td>
+            <td>{{ log.status }}</td>
+            <td>{{ log.port }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="6">No logs available.</td></tr>
+        {% endfor %}
+    </table>
+</div>
+{% endblock %}

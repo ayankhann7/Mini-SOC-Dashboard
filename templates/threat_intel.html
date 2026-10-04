@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Threat Intelligence Feed</h2>
+<div class="card">
+    <p style="color: #aaa; margin-top: 0;">This is a mock database of known malicious IP addresses. If any uploaded log contains these IPs, a <strong>CRITICAL</strong> alert is automatically generated.</p>
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>Malicious IP Address</th>
+            <th>Threat Description</th>
+        </tr>
+        {% for row in intel_data %}
+        <tr>
+            <td>{{ row.id }}</td>
+            <td style="color: #ff5252; font-weight: bold;">{{ row.bad_ip }}</td>
+            <td>{{ row.description }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="3">No threat intelligence data found. Try restarting the app to initialize the database.</td></tr>
+        {% endfor %}
+    </table>
+</div>
+{% endblock %}

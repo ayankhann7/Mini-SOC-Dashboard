@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Security Alerts</h2>
+
+<div class="card">
+    <div style="display: flex; justify-content: flex-end; margin-bottom: 15px;">
+        <form method="GET" style="display: flex; gap: 10px;">
+            <input type="text" name="search_ip" placeholder="Search Source IP..." value="{{ search_ip }}" style="width: auto; padding: 5px;">
+            <button type="submit" class="btn btn-sm">Filter</button>
+            <a href="{{ url_for('alerts') }}" class="btn btn-sm" style="background-color: #555; color: white;">Clear</a>
+        </form>
+    </div>
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>Timestamp</th>
+            <th>Alert Type</th>
+            <th>Source IP</th>
+            <th>Severity</th>
+            <th>Status</th>
+            <th>Action</th>
+        </tr>
+        {% for alert in alerts %}
+        <tr>
+            <td>{{ alert.id }}</td>
+            <td>{{ alert.timestamp }}</td>
+            <td>{{ alert.alert_type }}</td>
+            <td>{{ alert.source_ip }}</td>
+            <td class="{% if alert.severity == 'HIGH' %}text-high{% elif alert.severity == 'MEDIUM' %}text-medium{% endif %}">{{ alert.severity }}</td>
+            <td class="{% if alert.status == 'Resolved' %}text-resolved{% elif alert.status == 'Investigating' %}text-investigating{% else %}text-new{% endif %}">{{ alert.status }}</td>
+            <td><a href="{{ url_for('alert_detail', alert_id=alert.id) }}" class="btn btn-sm">Investigate</a></td>
+        </tr>
+        {% else %}
+        <tr><td colspan="7">No alerts detected yet.</td></tr>
+        {% endfor %}
+    </table>
+</div>
+{% endblock %}

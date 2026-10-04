@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center;">
+    <h2>SOC Dashboard</h2>
+    <div style="display: flex; gap: 10px;">
+        {% if sniffing_active %}
+        <a href="{{ url_for('toggle_live') }}" class="btn" style="background-color: #ff5252;">Stop Live Capture</a>
+        {% else %}
+        <a href="{{ url_for('toggle_live') }}" class="btn" style="background-color: #4caf50;">Start Live Capture</a>
+        {% endif %}
+        <a href="{{ url_for('export_report') }}" class="btn">Generate Shift Report</a>
+    </div>
+</div>
+
+<div class="dashboard-grid">
+    <div class="stat-box">
+        <h3>Total Events</h3>
+        <div class="num">{{ total_events }}</div>
+    </div>
+    <div class="stat-box">
+        <h3>Total Alerts</h3>
+        <div class="num">{{ total_alerts }}</div>
+    </div>
+    <div class="stat-box high">
+        <h3>High Alerts</h3>
+        <div class="num text-high">{{ high_alerts }}</div>
+    </div>
+    <div class="stat-box medium">
+        <h3>Medium Alerts</h3>
+        <div class="num text-medium">{{ medium_alerts }}</div>
+    </div>
+    <div class="stat-box">
+        <h3>Open Alerts</h3>
+        <div class="num">{{ open_alerts }}</div>
+    </div>
+</div>
+
+<div style="display: flex; gap: 20px; flex-wrap: wrap; margin-top: 20px;">
+    <div class="card" style="flex: 1; min-width: 300px;">
+        <h3>Alerts by Severity</h3>
+        <div class="chart-container">
+            <canvas id="alertChart"></canvas>
+        </div>
+    </div>
+    <div class="card" style="flex: 2; min-width: 500px;">
+        <h3>Recent Alerts</h3>
+        <table>
+            <tr>
+                <th>Time</th>
+                <th>Type</th>
+                <th>Severity</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+            {% for alert in recent_alerts %}
+            <tr>
+                <td>{{ alert.timestamp }}</td>
+                <td>{{ alert.alert_type }}</td>
+                <td class="{% if alert.severity == 'HIGH' %}text-high{% elif alert.severity == 'MEDIUM' %}text-medium{% endif %}">{{ alert.severity }}</td>
+                <td class="{% if alert.status == 'Resolved' %}text-resolved{% elif alert.status == 'Investigating' %}text-investigating{% else %}text-new{% endif %}">{{ alert.status }}</td>
+                <td><a href="{{ url_for('alert_detail', alert_id=alert.id) }}" class="btn btn-sm">View</a></td>
+            </tr>
+            {% else %}
+            <tr><td colspan="5">No alerts found.</td></tr>
+            {% endfor %}
+        </table>
+    </div>
+</div>
+
+<div class="card" style="margin-top: 20px;">
+    <h3 style="color: #ff5252;">Currently Blocked IPs (Mitigation Action)</h3>
+    <table>
+        <tr>
+            <th>IP Address</th>
+            <th>Timestamp</th>
+            <th>Reason</th>
+        </tr>
+        {% for ip in blocked_ips %}
+        <tr>
+            <td style="color: #ff5252; font-weight: bold;">{{ ip.ip_address }}</td>
+            <td>{{ ip.timestamp }}</td>
+            <td>{{ ip.reason }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="3">No IPs are currently blocked.</td></tr>
+        {% endfor %}
+    </table>
+</div>
+
+<script>
+    const ctx = document.getElementById('alertChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['HIGH', 'MEDIUM'],
+            datasets: [{
+                data: [{{ chart_data.high }}, {{ chart_data.medium }}],
+                backgroundColor: ['#ff5252', '#ffd740'],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    labels: { color: '#e0e0e0' }
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}
