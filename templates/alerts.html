@@ -1,38 +1,57 @@
 {% extends 'base.html' %}
-
 {% block content %}
-<h2>Security Alerts</h2>
+<div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 30px;">
+    <div>
+        <h1 class="page-title">Security Alerts</h1>
+        <p class="page-subtitle">Manage and investigate auto-generated threats.</p>
+    </div>
+</div>
 
 <div class="card">
-    <div style="display: flex; justify-content: flex-end; margin-bottom: 15px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h3 style="margin: 0; font-size: 1rem;">Active Alert Queue</h3>
         <form method="GET" style="display: flex; gap: 10px;">
-            <input type="text" name="search_ip" placeholder="Search Source IP..." value="{{ search_ip }}" style="width: auto; padding: 5px;">
-            <button type="submit" class="btn btn-sm">Filter</button>
-            <a href="{{ url_for('alerts') }}" class="btn btn-sm" style="background-color: #555; color: white;">Clear</a>
+            <input type="text" name="search_ip" placeholder="Search IP..." value="{{ search_ip }}" style="padding: 6px 12px; font-size: 0.85rem;">
+            <button type="submit" class="btn btn-secondary" style="padding: 6px 12px;"><i class="fa-solid fa-filter"></i> Filter</button>
         </form>
     </div>
+
     <table>
         <tr>
-            <th>ID</th>
-            <th>Timestamp</th>
-            <th>Alert Type</th>
-            <th>Source IP</th>
+            <th>Alert ID</th>
             <th>Severity</th>
+            <th>Type</th>
+            <th>Source IP</th>
+            <th>Timestamp</th>
             <th>Status</th>
             <th>Action</th>
         </tr>
         {% for alert in alerts %}
         <tr>
-            <td>{{ alert.id }}</td>
+            <td style="color: var(--text-muted);">#{{ alert.id }}</td>
+            <td>
+                <span class="status-pill {% if alert.severity == 'HIGH' or alert.severity == 'CRITICAL' %}danger{% elif alert.severity == 'MEDIUM' %}warning{% else %}good{% endif %}">
+                    {{ alert.severity }}
+                </span>
+            </td>
+            <td style="font-weight: 600;">{{ alert.alert_type }}</td>
+            <td style="color: var(--accent-blue); font-weight: 500;">{{ alert.source_ip }}</td>
             <td>{{ alert.timestamp }}</td>
-            <td>{{ alert.alert_type }}</td>
-            <td>{{ alert.source_ip }}</td>
-            <td class="{% if alert.severity == 'HIGH' %}text-high{% elif alert.severity == 'MEDIUM' %}text-medium{% endif %}">{{ alert.severity }}</td>
-            <td class="{% if alert.status == 'Resolved' %}text-resolved{% elif alert.status == 'Investigating' %}text-investigating{% else %}text-new{% endif %}">{{ alert.status }}</td>
-            <td><a href="{{ url_for('alert_detail', alert_id=alert.id) }}" class="btn btn-sm">Investigate</a></td>
+            <td>
+                {% if alert.status == 'Resolved' %}
+                    <span style="color: var(--success);"><i class="fa-solid fa-check"></i> Resolved</span>
+                {% elif alert.status == 'Investigating' %}
+                    <span style="color: var(--warning);"><i class="fa-solid fa-magnifying-glass"></i> Investigating</span>
+                {% else %}
+                    <span style="color: var(--danger);"><i class="fa-solid fa-circle-exclamation"></i> New</span>
+                {% endif %}
+            </td>
+            <td>
+                <a href="{{ url_for('alert_detail', alert_id=alert.id) }}" class="btn btn-secondary" style="padding: 5px 10px; font-size: 0.8rem;">Investigate <i class="fa-solid fa-arrow-right"></i></a>
+            </td>
         </tr>
         {% else %}
-        <tr><td colspan="7">No alerts detected yet.</td></tr>
+        <tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 30px;">No alerts generated yet.</td></tr>
         {% endfor %}
     </table>
 </div>

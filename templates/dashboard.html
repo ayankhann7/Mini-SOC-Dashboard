@@ -1,91 +1,146 @@
 {% extends 'base.html' %}
-
 {% block content %}
-<div style="display: flex; justify-content: space-between; align-items: center;">
-    <h2>SOC Dashboard</h2>
-    <div style="display: flex; gap: 10px;">
-        {% if sniffing_active %}
-        <a href="{{ url_for('toggle_live') }}" class="btn" style="background-color: #ff5252;">Stop Live Capture</a>
-        {% else %}
-        <a href="{{ url_for('toggle_live') }}" class="btn" style="background-color: #4caf50;">Start Live Capture</a>
-        {% endif %}
-        <a href="{{ url_for('export_report') }}" class="btn">Generate Shift Report</a>
+
+<div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px;">
+    <div>
+        <h1 class="page-title">Threat Detection Engine</h1>
+        <p class="page-subtitle">Automated continuous monitoring across global security network. Live capture is currently 
+            <strong style="color: {% if sniffing_active %}var(--success){% else %}var(--warning){% endif %};">
+                {% if sniffing_active %}ACTIVE{% else %}INACTIVE{% endif %}
+            </strong>.
+        </p>
+    </div>
+    <div style="display: flex; gap: 15px;">
+        <a href="{{ url_for('toggle_live') }}" class="btn btn-secondary">
+            <i class="fa-solid fa-satellite-dish"></i> 
+            {% if sniffing_active %}Stop Capture{% else %}Start Live Capture{% endif %}
+        </a>
+        <a href="{{ url_for('export_report') }}" class="btn">
+            <i class="fa-solid fa-download"></i> Export Data
+        </a>
     </div>
 </div>
 
+<!-- Top Metric Cards -->
 <div class="dashboard-grid">
-    <div class="stat-box">
-        <h3>Total Events</h3>
-        <div class="num">{{ total_events }}</div>
+    <div class="metric-card">
+        <div class="metric-header">
+            <div class="metric-icon" style="color: var(--accent-blue);"><i class="fa-solid fa-server"></i></div>
+            <span class="status-pill good">Live</span>
+        </div>
+        <div class="metric-value">{{ total_events }}</div>
+        <div class="metric-title">Total Network Events</div>
+        <div class="metric-footer"><div class="metric-progress" style="width: 100%; background-color: var(--accent-blue);"></div></div>
     </div>
-    <div class="stat-box">
-        <h3>Total Alerts</h3>
-        <div class="num">{{ total_alerts }}</div>
+
+    <div class="metric-card">
+        <div class="metric-header">
+            <div class="metric-icon" style="color: var(--danger);"><i class="fa-solid fa-triangle-exclamation"></i></div>
+            <span class="status-pill {% if total_alerts > 0 %}danger{% else %}good{% endif %}">Alert</span>
+        </div>
+        <div class="metric-value">{{ total_alerts }}</div>
+        <div class="metric-title">Total Alerts Generated</div>
+        <div class="metric-footer"><div class="metric-progress" style="width: {% if total_events > 0 %}{{ (total_alerts / total_events) * 100 }}{% else %}0{% endif %}%; background-color: var(--danger);"></div></div>
     </div>
-    <div class="stat-box high">
-        <h3>High Alerts</h3>
-        <div class="num text-high">{{ high_alerts }}</div>
+
+    <div class="metric-card">
+        <div class="metric-header">
+            <div class="metric-icon" style="color: var(--danger);"><i class="fa-solid fa-fire"></i></div>
+            <span class="status-pill danger">Critical</span>
+        </div>
+        <div class="metric-value">{{ high_alerts }}</div>
+        <div class="metric-title">High Severity Alerts</div>
+        <div class="metric-footer"><div class="metric-progress" style="width: {% if total_alerts > 0 %}{{ (high_alerts / total_alerts) * 100 }}{% else %}0{% endif %}%; background-color: var(--danger);"></div></div>
     </div>
-    <div class="stat-box medium">
-        <h3>Medium Alerts</h3>
-        <div class="num text-medium">{{ medium_alerts }}</div>
+
+    <div class="metric-card">
+        <div class="metric-header">
+            <div class="metric-icon" style="color: var(--warning);"><i class="fa-solid fa-shield"></i></div>
+            <span class="status-pill warning">Warning</span>
+        </div>
+        <div class="metric-value">{{ medium_alerts }}</div>
+        <div class="metric-title">Medium Severity Alerts</div>
+        <div class="metric-footer"><div class="metric-progress" style="width: {% if total_alerts > 0 %}{{ (medium_alerts / total_alerts) * 100 }}{% else %}0{% endif %}%; background-color: var(--warning);"></div></div>
     </div>
-    <div class="stat-box">
-        <h3>Open Alerts</h3>
-        <div class="num">{{ open_alerts }}</div>
+
+    <div class="metric-card">
+        <div class="metric-header">
+            <div class="metric-icon" style="color: var(--success);"><i class="fa-solid fa-check-double"></i></div>
+            <span class="status-pill warning">Pending</span>
+        </div>
+        <div class="metric-value">{{ open_alerts }}</div>
+        <div class="metric-title">Unresolved Alerts</div>
+        <div class="metric-footer"><div class="metric-progress" style="width: {% if total_alerts > 0 %}{{ (open_alerts / total_alerts) * 100 }}{% else %}0{% endif %}%; background-color: var(--warning);"></div></div>
     </div>
 </div>
 
-<div style="display: flex; gap: 20px; flex-wrap: wrap; margin-top: 20px;">
-    <div class="card" style="flex: 1; min-width: 300px;">
-        <h3>Alerts by Severity</h3>
-        <div class="chart-container">
+<div class="content-grid">
+    <!-- Chart Section -->
+    <div class="card" style="display: flex; flex-direction: column;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+            <h3 style="margin: 0; font-size: 1rem;">Threat Distribution</h3>
+            <i class="fa-solid fa-circle-info" style="color: var(--text-muted);"></i>
+        </div>
+        <div style="flex: 1; display: flex; align-items: center; justify-content: center; position: relative; min-height: 250px;">
             <canvas id="alertChart"></canvas>
+            <div style="position: absolute; text-align: center;">
+                <div style="font-size: 2rem; font-weight: bold;">{{ total_alerts }}</div>
+                <div style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase;">Total Alerts</div>
+            </div>
         </div>
     </div>
-    <div class="card" style="flex: 2; min-width: 500px;">
-        <h3>Recent Alerts</h3>
-        <table>
-            <tr>
-                <th>Time</th>
-                <th>Type</th>
-                <th>Severity</th>
-                <th>Status</th>
-                <th>Action</th>
-            </tr>
+
+    <!-- Remediation Queue -->
+    <div class="card">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+            <h3 style="margin: 0; font-size: 1rem;">Remediation Priority Queue</h3>
+            <span style="color: var(--text-muted); font-size: 0.8rem;">Recent Alerts</span>
+        </div>
+        
+        <div>
             {% for alert in recent_alerts %}
-            <tr>
-                <td>{{ alert.timestamp }}</td>
-                <td>{{ alert.alert_type }}</td>
-                <td class="{% if alert.severity == 'HIGH' %}text-high{% elif alert.severity == 'MEDIUM' %}text-medium{% endif %}">{{ alert.severity }}</td>
-                <td class="{% if alert.status == 'Resolved' %}text-resolved{% elif alert.status == 'Investigating' %}text-investigating{% else %}text-new{% endif %}">{{ alert.status }}</td>
-                <td><a href="{{ url_for('alert_detail', alert_id=alert.id) }}" class="btn btn-sm">View</a></td>
-            </tr>
+            <div class="list-item">
+                <div class="list-item-icon" style="background-color: {% if alert.severity == 'HIGH' or alert.severity == 'CRITICAL' %}rgba(239, 68, 68, 0.1); color: var(--danger);{% else %}rgba(245, 158, 11, 0.1); color: var(--warning);{% endif %}">
+                    <i class="fa-solid {% if alert.severity == 'HIGH' or alert.severity == 'CRITICAL' %}fa-triangle-exclamation{% else %}fa-circle-exclamation{% endif %}"></i>
+                </div>
+                <div class="list-item-content">
+                    <div class="list-item-title">{{ alert.alert_type }}</div>
+                    <div class="list-item-subtitle">Target IP: {{ alert.source_ip }} &bull; {{ alert.timestamp }}</div>
+                </div>
+                <a href="{{ url_for('alert_detail', alert_id=alert.id) }}" class="btn btn-secondary" style="padding: 6px 12px; font-size: 0.8rem;">Investigate</a>
+            </div>
             {% else %}
-            <tr><td colspan="5">No alerts found.</td></tr>
+            <div style="text-align: center; color: var(--text-muted); padding: 30px;">
+                <i class="fa-solid fa-shield-check" style="font-size: 2rem; margin-bottom: 10px;"></i>
+                <div>No pending alerts in queue.</div>
+            </div>
             {% endfor %}
-        </table>
+        </div>
     </div>
 </div>
 
+<!-- Blocked IPs Section -->
 <div class="card" style="margin-top: 20px;">
-    <h3 style="color: #ff5252;">Currently Blocked IPs (Mitigation Action)</h3>
-    <table>
-        <tr>
-            <th>IP Address</th>
-            <th>Timestamp</th>
-            <th>Reason</th>
-        </tr>
+    <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+        <h3 style="margin: 0; font-size: 1rem;">Active Mitigations (Blocked IPs)</h3>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px;">
         {% for ip in blocked_ips %}
-        <tr>
-            <td style="color: #ff5252; font-weight: bold;">{{ ip.ip_address }}</td>
-            <td>{{ ip.timestamp }}</td>
-            <td>{{ ip.reason }}</td>
-        </tr>
+        <div class="list-item" style="margin-bottom: 0;">
+            <div class="list-item-icon" style="background-color: rgba(239, 68, 68, 0.1); color: var(--danger);">
+                <i class="fa-solid fa-ban"></i>
+            </div>
+            <div class="list-item-content">
+                <div class="list-item-title" style="color: var(--danger);">{{ ip.ip_address }}</div>
+                <div class="list-item-subtitle">{{ ip.reason }} &bull; {{ ip.timestamp }}</div>
+            </div>
+        </div>
         {% else %}
-        <tr><td colspan="3">No IPs are currently blocked.</td></tr>
+        <div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 20px;">
+            No IPs are currently blocked.
+        </div>
         {% endfor %}
-    </table>
+    </div>
 </div>
 
 <script>
@@ -93,18 +148,21 @@
     new Chart(ctx, {
         type: 'doughnut',
         data: {
-            labels: ['HIGH', 'MEDIUM'],
+            labels: ['Critical / High', 'Medium'],
             datasets: [{
                 data: [{{ chart_data.high }}, {{ chart_data.medium }}],
-                backgroundColor: ['#ff5252', '#ffd740'],
-                borderWidth: 0
+                backgroundColor: ['#ef4444', '#f59e0b'],
+                borderWidth: 0,
+                cutout: '80%'
             }]
         },
         options: {
             responsive: true,
+            maintainAspectRatio: false,
             plugins: {
                 legend: {
-                    labels: { color: '#e0e0e0' }
+                    position: 'bottom',
+                    labels: { color: '#908caa', padding: 20, font: { family: 'Inter' } }
                 }
             }
         }

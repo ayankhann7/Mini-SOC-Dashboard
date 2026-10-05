@@ -1,48 +1,60 @@
 {% extends 'base.html' %}
-
 {% block content %}
-<h2>Security Logs</h2>
+<div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 30px;">
+    <div>
+        <h1 class="page-title">Raw Security Logs</h1>
+        <p class="page-subtitle">Upload and parse raw network traffic logs (CSV or PCAP).</p>
+    </div>
+</div>
 
-<div class="card">
-    <h3 style="margin-top: 0;">Upload New Log (CSV or PCAP)</h3>
-    <p style="color: #aaa; font-size: 0.9em;">Uploading a CSV or a Wireshark .pcap file will automatically unpack the packets and run the detection engine to generate alerts.</p>
-    <form method="POST" enctype="multipart/form-data" style="display: flex; gap: 10px; align-items: center;">
-        <input type="file" name="file" accept=".csv, .pcap" required style="width: auto;">
-        <button type="submit" class="btn">Upload & Analyze</button>
+<div class="card" style="margin-bottom: 30px; display: flex; align-items: center; justify-content: space-between;">
+    <div>
+        <h3 style="margin-top: 0; font-size: 1rem;">Ingest New Data</h3>
+        <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 0;">Upload a CSV or a Wireshark .pcap file to automatically unpack packets and run the detection engine.</p>
+    </div>
+    <form method="POST" enctype="multipart/form-data" style="display: flex; gap: 15px; align-items: center;">
+        <input type="file" name="file" accept=".csv, .pcap" required style="background: rgba(255,255,255,0.05); border: 1px dashed var(--border-color);">
+        <button type="submit" class="btn"><i class="fa-solid fa-cloud-arrow-up"></i> Upload & Analyze</button>
     </form>
 </div>
 
 <div class="card">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-        <h3 style="margin: 0;">Recent Logs (Latest 100)</h3>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h3 style="margin: 0; font-size: 1rem;">Recent Ingested Logs</h3>
         <form method="GET" style="display: flex; gap: 10px;">
-            <input type="text" name="search_ip" placeholder="Search Source IP..." value="{{ search_ip }}" style="width: auto; padding: 5px;">
-            <input type="text" name="search_event" placeholder="Search Event Type..." value="{{ search_event }}" style="width: auto; padding: 5px;">
-            <button type="submit" class="btn btn-sm">Filter</button>
-            <a href="{{ url_for('logs') }}" class="btn btn-sm" style="background-color: #555; color: white;">Clear</a>
+            <input type="text" name="search_ip" placeholder="Filter by Source IP" value="{{ search_ip }}" style="padding: 6px 12px; font-size: 0.85rem;">
+            <button type="submit" class="btn btn-secondary" style="padding: 6px 12px;"><i class="fa-solid fa-filter"></i> Filter</button>
         </form>
     </div>
-    <table>
-        <tr>
-            <th>ID</th>
-            <th>Timestamp</th>
-            <th>Source IP</th>
-            <th>Event Type</th>
-            <th>Status</th>
-            <th>Port</th>
-        </tr>
-        {% for log in logs %}
-        <tr>
-            <td>{{ log.id }}</td>
-            <td>{{ log.timestamp }}</td>
-            <td>{{ log.source_ip }}</td>
-            <td>{{ log.event_type }}</td>
-            <td>{{ log.status }}</td>
-            <td>{{ log.port }}</td>
-        </tr>
-        {% else %}
-        <tr><td colspan="6">No logs available.</td></tr>
-        {% endfor %}
-    </table>
+    <div style="overflow-x: auto;">
+        <table>
+            <tr>
+                <th>ID</th>
+                <th>Timestamp</th>
+                <th>Source IP</th>
+                <th>Port</th>
+                <th>Event Type</th>
+                <th>Status</th>
+            </tr>
+            {% for log in logs %}
+            <tr>
+                <td style="color: var(--text-muted);">#{{ log.id }}</td>
+                <td>{{ log.timestamp }}</td>
+                <td style="color: var(--accent-blue); font-weight: 500;">{{ log.source_ip }}</td>
+                <td>{{ log.port }}</td>
+                <td><span style="background: rgba(255,255,255,0.1); padding: 3px 8px; border-radius: 4px; font-size: 0.75rem;">{{ log.event_type }}</span></td>
+                <td>
+                    {% if log.status == 'failed' or log.status == '404' %}
+                        <span style="color: var(--danger);">{{ log.status }}</span>
+                    {% else %}
+                        <span style="color: var(--success);">{{ log.status }}</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 30px;">No logs uploaded yet.</td></tr>
+            {% endfor %}
+        </table>
+    </div>
 </div>
 {% endblock %}

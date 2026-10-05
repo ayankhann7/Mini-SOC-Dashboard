@@ -1,64 +1,78 @@
 {% extends 'base.html' %}
-
 {% block content %}
-<div style="display: flex; justify-content: space-between; align-items: center;">
-    <h2>Alert Investigation: #{{ alert.id }}</h2>
-    <a href="{{ url_for('alerts') }}" class="btn btn-sm">Back to Alerts</a>
+<div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 30px;">
+    <div>
+        <h1 class="page-title">Alert Investigation</h1>
+        <p class="page-subtitle">Alert #{{ alert.id }} - {{ alert.alert_type }}</p>
+    </div>
+    <a href="{{ url_for('alerts') }}" class="btn btn-secondary"><i class="fa-solid fa-arrow-left"></i> Back to Queue</a>
 </div>
 
-<div style="display: flex; gap: 20px; flex-wrap: wrap;">
-    <div class="card" style="flex: 1; min-width: 300px;">
-        <h3 style="margin-top: 0; color: #00bcd4;">Alert Info</h3>
-        <p><strong>Type:</strong> {{ alert.alert_type }}</p>
-        <p><strong>Timestamp:</strong> {{ alert.timestamp }}</p>
-        <p><strong>Source IP:</strong> <span style="color: #ff9800;">{{ alert.source_ip }}</span></p>
-        <p><strong>Severity:</strong> <span class="{% if alert.severity == 'HIGH' %}text-high{% elif alert.severity == 'MEDIUM' %}text-medium{% endif %}">{{ alert.severity }}</span></p>
-        <p><strong>Details:</strong> {{ alert.details }}</p>
-        <p><strong>Current Status:</strong> <span class="{% if alert.status == 'Resolved' %}text-resolved{% elif alert.status == 'Investigating' %}text-investigating{% else %}text-new{% endif %}">{{ alert.status }}</span></p>
-        
-        <hr style="border: 1px solid #333; margin: 20px 0;">
-        
-        <h3>Update Status</h3>
-        <form method="POST">
-            <select name="status">
-                <option value="New" {% if alert.status == 'New' %}selected{% endif %}>New</option>
-                <option value="Investigating" {% if alert.status == 'Investigating' %}selected{% endif %}>Investigating</option>
-                <option value="Resolved" {% if alert.status == 'Resolved' %}selected{% endif %}>Resolved</option>
-            </select>
-            <button type="submit" class="btn" style="margin-top: 10px;">Save Status</button>
-        </form>
+<div class="content-grid">
+    <!-- Action Panel -->
+    <div style="display: flex; flex-direction: column; gap: 20px;">
+        <div class="card">
+            <h3 style="margin-top: 0; font-size: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">Alert Summary</h3>
+            <p><strong>Type:</strong> <span style="font-weight: 600;">{{ alert.alert_type }}</span></p>
+            <p><strong>Severity:</strong> <span class="status-pill {% if alert.severity == 'HIGH' or alert.severity == 'CRITICAL' %}danger{% elif alert.severity == 'MEDIUM' %}warning{% else %}good{% endif %}">{{ alert.severity }}</span></p>
+            <p><strong>Target IP:</strong> <span style="color: var(--accent-blue); font-weight: bold;">{{ alert.source_ip }}</span></p>
+            <p><strong>Time:</strong> {{ alert.timestamp }}</p>
+            <p><strong>Details:</strong> <br><span style="color: var(--text-muted);">{{ alert.details }}</span></p>
+            
+            <hr style="border: 1px solid var(--border-color); margin: 20px 0;">
+            
+            <h3 style="margin-top: 0; font-size: 1rem;">Update Status</h3>
+            <form method="POST" style="display: flex; flex-direction: column; gap: 10px;">
+                <select name="status" style="width: 100%;">
+                    <option value="New" {% if alert.status == 'New' %}selected{% endif %}>New</option>
+                    <option value="Investigating" {% if alert.status == 'Investigating' %}selected{% endif %}>Investigating</option>
+                    <option value="Resolved" {% if alert.status == 'Resolved' %}selected{% endif %}>Resolved</option>
+                </select>
+                <button type="submit" class="btn btn-secondary">Save Status</button>
+            </form>
+        </div>
 
-        <hr style="border: 1px solid #333; margin: 20px 0;">
-        
-        <h3 style="color: #ff5252;">Automated Mitigation</h3>
-        <form method="POST" action="{{ url_for('block_ip') }}">
-            <input type="hidden" name="ip_address" value="{{ alert.source_ip }}">
-            <input type="hidden" name="alert_id" value="{{ alert.id }}">
-            <input type="hidden" name="reason" value="Blocked from Alert #{{ alert.id }} - {{ alert.alert_type }}">
-            <button type="submit" class="btn" style="background-color: #ff5252; color: white;">BLOCK IP: {{ alert.source_ip }}</button>
-        </form>
+        <div class="card" style="border: 1px solid rgba(239, 68, 68, 0.3);">
+            <h3 style="margin-top: 0; font-size: 1rem; color: var(--danger);">Automated Mitigation</h3>
+            <p style="color: var(--text-muted); font-size: 0.85rem;">Instantly block this IP address across the network perimeter to prevent further unauthorized access.</p>
+            <form method="POST" action="{{ url_for('block_ip') }}" style="margin-top: 15px;">
+                <input type="hidden" name="ip_address" value="{{ alert.source_ip }}">
+                <input type="hidden" name="alert_id" value="{{ alert.id }}">
+                <input type="hidden" name="reason" value="Blocked from Alert #{{ alert.id }} - {{ alert.alert_type }}">
+                <button type="submit" class="btn btn-danger" style="width: 100%;"><i class="fa-solid fa-ban"></i> BLOCK IP: {{ alert.source_ip }}</button>
+            </form>
+        </div>
     </div>
 
-    <div class="card" style="flex: 2; min-width: 500px;">
-        <h3 style="margin-top: 0;">Evidence Logs for {{ alert.source_ip }}</h3>
-        <table>
-            <tr>
-                <th>Time</th>
-                <th>Event Type</th>
-                <th>Status</th>
-                <th>Port</th>
-            </tr>
-            {% for log in evidence %}
-            <tr>
-                <td>{{ log.timestamp }}</td>
-                <td>{{ log.event_type }}</td>
-                <td>{{ log.status }}</td>
-                <td>{{ log.port }}</td>
-            </tr>
-            {% else %}
-            <tr><td colspan="4">No evidence logs found.</td></tr>
-            {% endfor %}
-        </table>
+    <!-- Evidence Logs -->
+    <div class="card" style="height: fit-content;">
+        <h3 style="margin-top: 0; font-size: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">Evidence / Raw Logs ({{ alert.source_ip }})</h3>
+        <div style="overflow-x: auto;">
+            <table>
+                <tr>
+                    <th>Time</th>
+                    <th>Event Type</th>
+                    <th>Status</th>
+                    <th>Port</th>
+                </tr>
+                {% for log in related_logs %}
+                <tr>
+                    <td>{{ log.timestamp }}</td>
+                    <td><span style="background: rgba(255,255,255,0.05); padding: 3px 8px; border-radius: 4px; font-size: 0.75rem;">{{ log.event_type }}</span></td>
+                    <td>
+                        {% if log.status == 'failed' or log.status == '404' %}
+                            <span style="color: var(--danger);">{{ log.status }}</span>
+                        {% else %}
+                            <span style="color: var(--success);">{{ log.status }}</span>
+                        {% endif %}
+                    </td>
+                    <td style="color: var(--text-muted);">{{ log.port }}</td>
+                </tr>
+                {% else %}
+                <tr><td colspan="4" style="text-align: center; color: var(--text-muted); padding: 30px;">No related logs found.</td></tr>
+                {% endfor %}
+            </table>
+        </div>
     </div>
 </div>
 {% endblock %}

@@ -2,35 +2,85 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mini SOC Dashboard</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
+    
     {% if session.get('user_id') %}
-    <div class="navbar">
-        <div>
-            <a href="{{ url_for('dashboard') }}">Dashboard</a>
-            <a href="{{ url_for('logs') }}">Logs</a>
-            <a href="{{ url_for('alerts') }}">Alerts</a>
-            <a href="{{ url_for('threat_intel') }}">Threat Intel</a>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-logo">
+            <i class="fa-solid fa-shield-halved"></i>
+            <div>
+                MiniSOC<br>
+                <span style="font-size: 0.7rem; font-weight: 400; color: var(--text-muted);">ENTERPRISE EDITION</span>
+            </div>
         </div>
-        <div class="nav-right">
-            Logged in as <strong>{{ session.get('username') }}</strong> | <a href="{{ url_for('logout') }}">Logout</a>
+
+        <div class="nav-section">General</div>
+        <div class="nav-menu">
+            <a href="{{ url_for('dashboard') }}" class="nav-item {% if request.endpoint == 'dashboard' %}active{% endif %}">
+                <i class="fa-solid fa-table-columns"></i> Dashboard
+            </a>
+            <a href="{{ url_for('logs') }}" class="nav-item {% if request.endpoint == 'logs' %}active{% endif %}">
+                <i class="fa-solid fa-server"></i> Raw Logs
+            </a>
+        </div>
+
+        <div class="nav-section">Operations</div>
+        <div class="nav-menu">
+            <a href="{{ url_for('alerts') }}" class="nav-item {% if request.endpoint == 'alerts' or request.endpoint == 'alert_detail' %}active{% endif %}">
+                <i class="fa-solid fa-bell"></i> Security Alerts
+            </a>
+            <a href="{{ url_for('threat_intel') }}" class="nav-item {% if request.endpoint == 'threat_intel' %}active{% endif %}">
+                <i class="fa-solid fa-globe"></i> Threat Intel
+            </a>
         </div>
     </div>
     {% endif %}
 
-    <div class="container">
-        {% with messages = get_flashed_messages() %}
-          {% if messages %}
-            {% for message in messages %}
-              <div class="flash">{{ message }}</div>
-            {% endfor %}
-          {% endif %}
-        {% endwith %}
-        
-        {% block content %}{% endblock %}
+    <!-- Main Wrapper -->
+    <div class="main-wrapper">
+        {% if session.get('user_id') %}
+        <!-- Top Header -->
+        <div class="top-header">
+            <div class="header-breadcrumbs">
+                Enterprise Suite &nbsp;>&nbsp; <span>{{ request.endpoint | capitalize | replace('_', ' ') }}</span>
+            </div>
+            
+            <div class="header-search">
+                <i class="fa-solid fa-magnifying-glass" style="color: var(--text-muted);"></i>
+                <input type="text" placeholder="Search controls or logs...">
+            </div>
+
+            <div class="header-user">
+                <i class="fa-regular fa-bell"></i>
+                <i class="fa-solid fa-gear"></i>
+                <div style="background: var(--accent-blue); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold;">
+                    {{ session.get('username')[0] | upper }}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Content Area -->
+        <div class="main-content">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+              {% if messages %}
+                {% for category, message in messages %}
+                  <div style="padding: 15px; margin-bottom: 20px; border-radius: 8px; background-color: {% if category == 'error' %}rgba(239, 68, 68, 0.2){% else %}rgba(16, 185, 129, 0.2){% endif %}; color: {% if category == 'error' %}var(--danger){% else %}var(--success){% endif %}; border: 1px solid currentColor;">
+                      {{ message }}
+                  </div>
+                {% endfor %}
+              {% endif %}
+            {% endwith %}
+
+            {% block content %}{% endblock %}
+        </div>
     </div>
 </body>
 </html>
