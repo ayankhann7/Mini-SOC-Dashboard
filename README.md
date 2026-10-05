@@ -2,6 +2,9 @@
 
 A functional Mini Security Operations Center (SOC) project designed for cybersecurity students. It provides a simple but realistic platform for security analysts to upload logs, detect suspicious activities automatically, and investigate alerts.
 
+🚀 **Live Demo:** [https://mini-soc-dashboard-3ojq.onrender.com](https://mini-soc-dashboard-3ojq.onrender.com)
+*(Note: Use `admin` / `admin123` to log in)*
+
 ## Project Structure
 
 ```text
