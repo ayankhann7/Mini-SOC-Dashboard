@@ -291,8 +291,30 @@ def alert_detail(alert_id):
     alert = conn.execute('SELECT * FROM alerts WHERE id = ?', (alert_id,)).fetchone()
     evidence = conn.execute('SELECT * FROM logs WHERE source_ip = ? ORDER BY id DESC LIMIT 20', (alert['source_ip'],)).fetchall()
     conn.close()
+    return render_template('alert_detail.html', alert=alert, related_logs=evidence)
+
+@app.route('/alerts/<int:alert_id>/report')
+def alert_report(alert_id):
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+        
+    conn = get_db_connection()
+    alert = conn.execute('SELECT * FROM alerts WHERE id = ?', (alert_id,)).fetchone()
     
-    return render_template('alert_detail.html', alert=alert, evidence=evidence)
+    if not alert:
+        conn.close()
+        flash('Alert not found')
+        return redirect(url_for('alerts'))
+        
+    evidence = conn.execute('SELECT * FROM logs WHERE source_ip = ? ORDER BY id DESC LIMIT 50', (alert['source_ip'],)).fetchall()
+    blocked_status = conn.execute('SELECT * FROM blocked_ips WHERE ip_address = ?', (alert['source_ip'],)).fetchone()
+    
+    conn.close()
+    
+    import datetime
+    current_date = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    
+    return render_template('report.html', alert=alert, evidence=evidence, blocked_status=blocked_status, date=current_date)
 
 if __name__ == '__main__':
     init_db()

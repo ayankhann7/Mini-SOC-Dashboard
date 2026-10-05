@@ -5,7 +5,10 @@
         <h1 class="page-title">Alert Investigation</h1>
         <p class="page-subtitle">Alert #{{ alert.id }} - {{ alert.alert_type }}</p>
     </div>
-    <a href="{{ url_for('alerts') }}" class="btn btn-secondary"><i class="fa-solid fa-arrow-left"></i> Back to Queue</a>
+    <div style="display: flex; gap: 10px;">
+        <a href="{{ url_for('alerts') }}" class="btn btn-secondary"><i class="fa-solid fa-arrow-left"></i> Back to Queue</a>
+        <a href="{{ url_for('alert_report', alert_id=alert.id) }}" target="_blank" class="btn"><i class="fa-solid fa-file-pdf"></i> Incident Report</a>
+    </div>
 </div>
 
 <div class="content-grid">
