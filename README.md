@@ -42,6 +42,8 @@ MINI_SOC/
 3. **Excessive Requests (HIGH):** Triggers if a single IP generates 15 or more events in total.
 4. **After-Hours Login (MEDIUM):** Triggers if a successful login occurs between 1:00 AM and 5:00 AM.
 5. **Directory Brute Force (HIGH):** Triggers if a single IP causes 10 or more '404 Not Found' errors.
+6. **Threat Intel Match (CRITICAL):** Cross-references all IPs against a mock database of known malicious actors.
+7. **Behavioral Analytics (HIGH):** Uses statistical mathematics to calculate the network's average traffic baseline. Triggers an anomaly alert if an IP exceeds 2 standard deviations above the mean.
 
 ## Installation & Setup
 

@@ -71,6 +71,25 @@ def run_detection_rules(df, c):
     except Exception:
         pass # In case table isn't created yet for some reason
 
+    # Rule 7: Statistical Anomaly Detection (Behavioral Analytics)
+    # Identifies IPs generating traffic wildly above the network's normal baseline
+    try:
+        counts = df['source_ip'].value_counts()
+        if len(counts) > 2:  # Need enough data points for statistics
+            mean_val = counts.mean()
+            std_val = counts.std()
+            
+            if std_val > 0:
+                threshold = mean_val + (2 * std_val) # 2 standard deviations above mean
+                
+                for ip, count in counts.items():
+                    if count > threshold:
+                        first_seen = df[df['source_ip'] == ip]['timestamp'].min()
+                        details = f"Behavioral Anomaly: Generated {count} events (Network average is {mean_val:.1f}). Statistically significant deviation."
+                        insert_alert_if_new(c, 'Behavioral Anomaly (Volume)', ip, first_seen, 'HIGH', 'New', details)
+    except Exception:
+        pass
+
 def process_logs_and_detect(csv_path):
     df = pd.read_csv(csv_path)
     
