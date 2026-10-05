@@ -39,6 +39,33 @@ def login():
             
     return render_template('login.html')
 
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        
+        conn = get_db_connection()
+        existing = conn.execute('SELECT * FROM users WHERE username = ?', (username,)).fetchone()
+        
+        if existing:
+            flash('Username already exists!')
+        else:
+            conn.execute('INSERT INTO users (username, password) VALUES (?, ?)', (username, password))
+            conn.commit()
+            conn.close()
+            # Log them in automatically
+            conn = get_db_connection()
+            user = conn.execute('SELECT * FROM users WHERE username = ?', (username,)).fetchone()
+            session['user_id'] = user['id']
+            session['username'] = user['username']
+            conn.close()
+            return redirect(url_for('dashboard'))
+            
+        conn.close()
+            
+    return render_template('register.html')
+
 @app.route('/logout')
 def logout():
     session.clear()
