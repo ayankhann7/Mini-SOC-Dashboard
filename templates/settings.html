@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 30px;">
+    <div>
+        <h1 class="page-title">System Settings</h1>
+        <p class="page-subtitle">Configure engine parameters and manage database storage.</p>
+    </div>
+</div>
+
+<div class="content-grid">
+    <div class="card">
+        <h3 style="margin-top: 0; font-size: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">Database Management</h3>
+        <p style="color: var(--text-muted); font-size: 0.9rem;">
+            Wiping the database will permanently delete all ingested logs, alerts, and blocked IPs. Threat Intelligence feeds and User accounts will remain intact.
+        </p>
+        
+        <form method="POST" action="{{ url_for('reset_db') }}" onsubmit="return confirm('Are you absolutely sure you want to delete all logs and alerts? This cannot be undone.');">
+            <button type="submit" class="btn btn-danger" style="margin-top: 10px;">
+                <i class="fa-solid fa-trash-can"></i> Purge Database
+            </button>
+        </form>
+    </div>
+
+    <div class="card">
+        <h3 style="margin-top: 0; font-size: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">System Information</h3>
+        <table style="margin-top: 15px;">
+            <tr>
+                <td style="color: var(--text-muted); width: 150px;">Engine Status</td>
+                <td><span class="status-pill good">Online</span></td>
+            </tr>
+            <tr>
+                <td style="color: var(--text-muted);">Live Sniffing</td>
+                <td>
+                    <span style="font-size: 0.85rem;">
+                        Disabled on Cloud Deployments (Requires local Admin execution)
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td style="color: var(--text-muted);">Current User</td>
+                <td style="font-weight: bold;">{{ session.get('username') }}</td>
+            </tr>
+            <tr>
+                <td style="color: var(--text-muted);">Version</td>
+                <td>Enterprise v2.1.0</td>
+            </tr>
+        </table>
+    </div>
+</div>
+{% endblock %}

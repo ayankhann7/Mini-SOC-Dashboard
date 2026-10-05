@@ -86,6 +86,27 @@ def toggle_live():
         
     return redirect(url_for('dashboard'))
 
+@app.route('/settings')
+def settings():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    return render_template('settings.html')
+
+@app.route('/reset_db', methods=['POST'])
+def reset_db():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+        
+    conn = get_db_connection()
+    conn.execute('DELETE FROM logs')
+    conn.execute('DELETE FROM alerts')
+    conn.execute('DELETE FROM blocked_ips')
+    conn.commit()
+    conn.close()
+    
+    flash('Database successfully reset. All logs and alerts cleared.', 'success')
+    return redirect(url_for('dashboard'))
+
 @app.route('/dashboard')
 def dashboard():
     if 'user_id' not in session:

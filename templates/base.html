@@ -58,11 +58,17 @@
             </div>
 
             <div class="header-user">
-                <i class="fa-regular fa-bell"></i>
-                <i class="fa-solid fa-gear"></i>
-                <div style="background: var(--accent-blue); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold;">
-                    {{ session.get('username')[0] | upper }}
-                </div>
+                <a href="{{ url_for('alerts') }}" style="color: var(--text-muted); text-decoration: none;" title="Alerts">
+                    <i class="fa-regular fa-bell"></i>
+                </a>
+                <a href="{{ url_for('settings') }}" style="color: var(--text-muted); text-decoration: none;" title="Settings">
+                    <i class="fa-solid fa-gear"></i>
+                </a>
+                <a href="{{ url_for('logout') }}" title="Logout" style="text-decoration: none; color: white;">
+                    <div style="background: var(--accent-blue); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold;">
+                        {{ session.get('username')[0] | upper }}
+                    </div>
+                </a>
             </div>
         </div>
         {% endif %}
