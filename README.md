@@ -80,3 +80,11 @@ To use the "Start Live Capture" feature on Windows, you must install **[Npcap](h
 4. **Investigating Alerts:**
    - Click **Investigate** on any alert to view its details and associated evidence logs for that specific IP.
    - Update the alert status from "New" to "Investigating" or "Resolved".
+
+## Why I Built This (Motivation)
+As a cybersecurity student, I found that most academic projects either focus entirely on writing a simple script, or using massively complex enterprise tools (like Splunk or ELK) that are difficult to setup for a quick demo. I wanted to build something right in the middle: a fully functional, end-to-end SOC dashboard that actually parses raw network data, runs real mathematical and rule-based detections, and allows a user to "respond" to threats.
+
+## Technical Challenges Faced
+- **PCAP Parsing Constraints:** Reading deep packet inspection data natively in Python was tricky. I initially wanted to build a live network sniffer, but handling Npcap driver issues on Windows proved too complex for a seamless setup. I pivoted to using `scapy` to parse offline `.pcap` files which is much more reliable for a standalone app.
+- **Handling UI Design vs Functionality:** It was a challenge making the app look like a modern enterprise tool (using custom CSS and Chart.js) while keeping the backend entirely lightweight with Flask and SQLite.
+- **Cloud Deployment Storage:** Deploying this to Render's free tier introduced the problem of "ephemeral storage," where the SQLite database gets wiped every time the server sleeps. To fix this, I engineered a custom startup command (`python database.py && gunicorn app:app`) to ensure the mock Threat Intel feeds are always re-seeded automatically upon boot.

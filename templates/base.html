@@ -17,7 +17,7 @@
             <i class="fa-solid fa-shield-halved"></i>
             <div>
                 MiniSOC<br>
-                <span style="font-size: 0.7rem; font-weight: 400; color: var(--text-muted);">ENTERPRISE EDITION</span>
+                <span style="font-size: 0.7rem; font-weight: 400; color: var(--text-muted);">ACADEMIC LAB V1.0</span>
             </div>
         </div>
 
@@ -49,7 +49,7 @@
         <!-- Top Header -->
         <div class="top-header">
             <div class="header-breadcrumbs">
-                Enterprise Suite &nbsp;>&nbsp; <span>{{ request.endpoint | capitalize | replace('_', ' ') }}</span>
+                Security Lab &nbsp;>&nbsp; <span>{{ request.endpoint | capitalize | replace('_', ' ') }}</span>
             </div>
             
             <div class="header-search">
@@ -86,6 +86,10 @@
             {% endwith %}
 
             {% block content %}{% endblock %}
+            
+            <div style="text-align: center; margin-top: 60px; padding: 20px; border-top: 1px solid var(--border-color); color: var(--text-muted); font-size: 0.85rem;">
+                Developed by <strong>Ayan Khan</strong> &mdash; Cybersecurity Capstone Project 2026
+            </div>
         </div>
     </div>
 </body>
