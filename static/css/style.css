@@ -352,3 +352,69 @@ input:focus, select:focus {
     width: 100%;
     font-size: 0.9rem;
 }
+
+/* Responsive Mobile Layout */
+@media (max-width: 768px) {
+    body {
+        flex-direction: column;
+        overflow: auto;
+    }
+    .sidebar {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+        padding: 15px 0;
+    }
+    .sidebar-logo {
+        margin-bottom: 10px;
+        padding-bottom: 10px;
+    }
+    .nav-menu {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    .nav-item {
+        flex: 1 1 calc(50% - 10px);
+        justify-content: center;
+        padding: 10px;
+    }
+    .main-wrapper {
+        overflow: visible;
+    }
+    .main-content {
+        padding: 15px;
+        overflow-y: visible;
+    }
+    .top-header {
+        flex-direction: column;
+        height: auto;
+        padding: 15px;
+        gap: 15px;
+        align-items: flex-start;
+    }
+    .header-user {
+        width: 100%;
+        justify-content: flex-end;
+    }
+    .header-search {
+        width: 100%;
+        box-sizing: border-box;
+    }
+    .content-grid {
+        grid-template-columns: 1fr;
+    }
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+    .page-title {
+        font-size: 1.4rem;
+    }
+    
+    /* Make tables scrollable horizontally */
+    table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+}

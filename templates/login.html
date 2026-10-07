@@ -20,6 +20,7 @@
             border-radius: 12px;
             border: 1px solid var(--border-color);
             width: 380px;
+            max-width: 90%;
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
         .login-header {
@@ -114,6 +115,9 @@
         <div class="auth-link">
             Don't have an account? <a href="{{ url_for('register') }}">Create one</a>
         </div>
+        <p style="text-align: center; color: var(--text-muted); font-size: 0.8rem; margin-top: 25px; opacity: 0.7;">
+            Demo access: <strong>admin</strong> / <strong>admin123</strong>
+        </p>
     </div>
 </body>
 </html>
